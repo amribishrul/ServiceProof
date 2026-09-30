@@ -1,3 +1,4 @@
+const connectDB = require("./config/db");
 const express = require("express");
 const cors = require("cors");
 
@@ -14,18 +15,31 @@ app.use(
 
 app.use(express.json());
 
+
 app.use(
   express.urlencoded({
     extended: true,
   })
 );
 
-// Health check
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
     message: "ServiceProof backend is running.",
   });
+});
+
+app.use(async (req, res, next) => {
+  if (req.path === "/api/health") {
+    return next();
+  }
+
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Routes
